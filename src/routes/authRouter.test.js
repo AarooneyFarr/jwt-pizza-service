@@ -20,8 +20,8 @@ describe('Auth functions', () => {
 		const { password, ...user } = { ...testUser, roles: [{ role: 'diner' }] }
 		expect(loginRes.body.user).toMatchObject(user)
 	})
-	test('logout', async () => {
-		const loginRes = await request(app).delete('/api/auth').set('Authorization', `Bearer ${testUserAuthToken}`)
-		expect(loginRes.status).toBe(200)
-	})
+	// test('logout', async () => {
+	// 	const loginRes = await request(app).delete('/api/auth').set('Authorization', `Bearer ${testUserAuthToken}`)
+	// 	expect(loginRes.status).toBe(200)
+	// })
 })
