@@ -5,6 +5,7 @@ const franchiseRouter = require('./routes/franchiseRouter.js')
 const version = require('./version.json')
 const config = require('./config.js')
 const metrics = require('./metrics')
+const logger = require('./logger')
 
 const app = express()
 app.use(express.json())
@@ -18,7 +19,11 @@ app.use((req, res, next) => {
 })
 
 const apiRouter = express.Router()
+
+// HTTP metric
 app.use(metrics.requestTracker.bind(metrics))
+
+// Latency metric
 app.use(function (req, res, next) {
 	var start = Date.now()
 	res.on('finish', function () {
@@ -27,6 +32,10 @@ app.use(function (req, res, next) {
 	})
 	next()
 })
+
+// HTTP Logging
+app.use(logger.httpLogger.bind(logger))
+
 app.use('/api', apiRouter)
 apiRouter.use('/auth', authRouter)
 apiRouter.use('/order', orderRouter)
@@ -56,6 +65,11 @@ app.use('*', (req, res) => {
 // Default error handler for all exceptions and errors.
 app.use((err, req, res, next) => {
 	res.status(err.statusCode ?? 500).json({ message: err.message, stack: err.stack })
+	logger.log(
+		logger.statusToLogLevel(err.statusCode ?? 500),
+		'exceptions',
+		JSON.stringify({ message: err.message, stack: err.stack })
+	)
 	next()
 })
 
