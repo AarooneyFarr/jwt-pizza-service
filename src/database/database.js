@@ -98,14 +98,17 @@ class DB {
 			const params = []
 			if (password) {
 				const hashedPassword = await bcrypt.hash(password, 10)
-				params.push(`password='${hashedPassword}'`)
+				params.push(hashedPassword)
 			}
 			if (email) {
-				params.push(`email='${email}'`)
+				params.push(email)
+			}
+			if (!email || !password) {
+				throw new Error('Missing values')
 			}
 			if (params.length > 0) {
-				const query = `UPDATE user SET ${params.join(', ')} WHERE id=${userId}`
-				await this.query(connection, query)
+				const query = `UPDATE user SET password =?, email=? WHERE id=?`
+				await this.query(connection, query, [params[0], params[1], userId])
 			}
 			return this.getUser(email, password)
 		} finally {
